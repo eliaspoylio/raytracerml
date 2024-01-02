@@ -7,10 +7,16 @@ let hit_sphere center r radius =
   let b = 2.0 *. dot_product oc r.dir in
   let c = (dot_product oc oc) -. radius*.radius in
   let discriminant = b*.b -. 4.*.a*.c in  
-  discriminant >= 0.
+
+  if discriminant < 0. then (-.1.0)
+  else (~-.b -. (sqrt discriminant) /. (2. *. a))
 
 let ray_color r =
-  if hit_sphere (make_vec3 0. 0. (-.1.)) r 0.5 then make_vec3 1. 0. 0.
+  let t = hit_sphere (make_vec3 0. 0. ~-.1.) r 0.5 in
+  if t > 0. 
+    then
+      let n = unit_vector ((at r t) -- make_vec3 0. 0. ~-.1.) in
+      scale_vec3 (make_vec3 (n.x+.1.) (n.y+.1.) (n.z+.1.)) 0.5
     else
       let unit_direction = unit_vector r.dir in
       let a = 0.5 *. (unit_direction.y +. 1.0) in
@@ -28,10 +34,7 @@ let () =
 
   (* Calculate the vectors across the horizontal and down the vertical viewport edges. *)
   let viewport_u = make_vec3 viewport_width 0. 0. in
-  Printf.printf "viewport_u: %f %f %f\n" viewport_u.x viewport_u.y viewport_u.z;
-  let viewport_v = make_vec3 0. (-.viewport_width/.1.57) 0. in
-  Printf.printf "viewport_v: %f %f %f\n" viewport_v.x viewport_v.y viewport_v.z;
-
+  let viewport_v = make_vec3 0. (-.viewport_width/.aspect_ratio) 0. in
 
   (*  Calculate the horizontal and vertical delta vectors from pixel to pixel. *)
   let pixel_delta_u = div_vec3 viewport_u (float image_width) in
