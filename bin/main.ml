@@ -3,13 +3,13 @@ open Raytracer.Ray
 
 let hit_sphere center r radius =
   let oc = r.orig -- center in
-  let a = dot_product r.dir r.dir in
-  let b = 2.0 *. dot_product oc r.dir in
-  let c = (dot_product oc oc) -. radius*.radius in
-  let discriminant = b*.b -. 4.*.a*.c in  
+  let a = length_squared r.dir in
+  let half_b = dot_product oc r.dir in
+  let c = length_squared oc -. radius*.radius in
+  let discriminant = half_b*.half_b -. a*.c in  
 
   if discriminant < 0. then (-.1.0)
-  else (~-.b -. (sqrt discriminant) /. (2. *. a))
+  else (~-.half_b -. (sqrt discriminant) /. a)
 
 let ray_color r =
   let t = hit_sphere (make_vec3 0. 0. ~-.1.) r 0.5 in
@@ -56,7 +56,6 @@ let () =
   
   (* Write pixel data *)
   for j = 0 to image_height - 1 do
-    (* Printf.printf "Scanlines remaining: %n\n" (image_height - j); *)
     for i = 0 to image_width - 1 do
       let pixel_center = pixel00_loc ++ (scale_vec3 pixel_delta_u (float i)) ++ (scale_vec3 pixel_delta_v (float j)) in
       let ray_direction = pixel_center -- camera_center in
