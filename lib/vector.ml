@@ -2,7 +2,11 @@ type vec3 = { x : float; y : float; z : float }
 
 let make_vec3 x y z = { x; y; z }
 
+let empty_vec3 = make_vec3 0. 0. 0.
+
 let add_vec3 v1 v2 = { x = v1.x +. v2.x; y = v1.y +. v2.y; z = v1.z +. v2.z }
+
+let neg_vec3 v = { x = ~-.(v.x); y = ~-.(v.y); z = ~-.(v.z) }
 
 let (--) (v1: vec3) (v2: vec3) : vec3 =
   { x = v1.x -. v2.x; y = v1.y -. v2.y; z = v1.z -. v2.z }

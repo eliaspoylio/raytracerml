@@ -1,5 +1,6 @@
 open Raytracer.Vector
 open Raytracer.Ray
+open Raytracer.Shapes
 
 let hit_sphere center r radius =
   let oc = r.orig -- center in
@@ -11,9 +12,10 @@ let hit_sphere center r radius =
   if discriminant < 0. then (-.1.0)
   else (~-.half_b -. (sqrt discriminant) /. a)
 
-let ray_color r =
+let ray_color r world =
+  let record = empty_record in
   let t = hit_sphere (make_vec3 0. 0. ~-.1.) r 0.5 in
-  if t > 0. 
+  if (hit world r 0. 1000. record).contents
     then
       let n = unit_vector ((at r t) -- make_vec3 0. 0. ~-.1.) in
       scale_vec3 (make_vec3 (n.x+.1.) (n.y+.1.) (n.z+.1.)) 0.5
@@ -26,6 +28,11 @@ let () =
   let aspect_ratio = 16.0 /. 9.0 in
   let image_width = 760 in
   let image_height = int_of_float (float image_width /. aspect_ratio) in
+
+  let world = [
+    { center = make_vec3 0. 0. ~-.1.; radius = 0.5 };
+    { center = make_vec3 0. ~-.100.5 ~-.1.; radius = 100. };
+  ] in
 
   let focal_length = 1.0 in
   let viewport_height = 2.0 in
@@ -50,7 +57,7 @@ let () =
   let pixel00_loc = viewport_upper_left ++ (scale_vec3 (pixel_delta_u ++ pixel_delta_v) 0.5) in
 
   (*write_ppm "output.ppm" image_width image_height;*)
-  let oc = open_out "output.ppm" in
+  let oc = open_out "output2.ppm" in
   (* Write PPM header *)
   Printf.fprintf oc "P3\n%d %d\n255\n" image_width image_height;
   
@@ -60,7 +67,7 @@ let () =
       let pixel_center = pixel00_loc ++ (scale_vec3 pixel_delta_u (float i)) ++ (scale_vec3 pixel_delta_v (float j)) in
       let ray_direction = pixel_center -- camera_center in
       let r = {orig=camera_center; dir=ray_direction} in
-      let pixel_color = ray_color r in
+      let pixel_color = ray_color r world in
 
       Printf.fprintf oc "%d %d %d "
         (int_of_float (255. *. pixel_color.x))
